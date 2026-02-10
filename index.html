@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Familien-Punkte System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4CAF50;
+            --secondary: #2196F3;
+            --accent: #FF9800;
+            --danger: #f44336;
+            --light: #f9f9f9;
+            --dark: #333;
+            --shadow: 0 4px 6px rgba(0,0,0,0.1);
+            --radius: 12px;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+            color: var(--dark);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        /* Login Screen */
+        .login-container {
+            background: white;
+            border-radius: var(--radius);
+            padding: 40px;
+            box-shadow: var(--shadow);
+            max-width: 400px;
+            margin: 50px auto;
+            text-align: center;
+        }
+        
+        .login-container h1 {
+            color: var(--secondary);
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: var(--dark);
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+        
+        input:focus {
+            border-color: var(--secondary);
+            outline: none;
+        }
+        
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: var(--secondary);
+            color: white;
+        }
+        
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+        
+        /* Main App */
+        .app-container {
+            display: none;
+        }
+        
+        header {
+            text-align: center;
+            padding: 20px;
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .user-info {
+            text-align: right;
+        }
+        
+        .user-info button {
+            margin-top: 5px;
+            padding: 5px 10px;
+            font-size: 0.8rem;
+        }
+        
+        .points-display {
+            background: white;
+            border-radius: var(--radius);
+            padding: 20px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+        }
+        
+        .total-points {
+            font-size: 3rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin: 10px 0;
+        }
+        
+        .actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .action-btn {
+            padding: 15px;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 1rem;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s;
+            box-shadow: var(--shadow);
+        }
+        
+        .action-btn i {
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+        }
+        
+        .section {
+            background: white;
+            border-radius: var(--radius);
+            padding: 20px;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+        }
+        
+        h2 {
+            margin-bottom: 15px;
+            color: var(--secondary);
+            border-bottom: 2px solid var(--accent);
+            padding-bottom: 5px;
+        }
+        
+        .task-item, .reward-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: var(--light);
+            border-radius: 10px;
+            border-left: 5px solid var(--primary);
+        }
+        
+        .reward-item {
+            border-left-color: var(--accent);
+        }
+        
+        .task-info, .reward-info {
+            flex-grow: 1;
+        }
+        
+        .task-title, .reward-title {
+            font-weight: bold;
+        }
+        
+        .task-points, .reward-points {
+            font-weight: bold;
+            color: var(--primary);
+            font-size: 1.2rem;
+        }
+        
+        .reward-points {
+            color: var(--accent);
+        }
+        
+        .task-actions, .reward-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .icon-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .complete-btn {
+            background: var(--primary);
+        }
+        
+        .redeem-btn {
+            background: var(--accent);
+        }
+        
+        .delete-btn {
+            background: var(--danger);
+        }
+        
+        .admin-only {
+            display: none;
+        }
+        
+        .admin-visible .admin-only {
+            display: block;
+        }
+        
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background: white;
+            width: 90%;
+            max-width: 500px;
+            border-radius: var(--radius);
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.8rem;
+            color: var(--dark);
+            cursor: pointer;
+        }
+        
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: var(--secondary);
+        }
+        
+        @media (max-width: 600px) {
+            .actions {
+                grid-template-columns: 1fr;
+            }
+            
+            header {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .user-info {
+                text-align: center;
+                margin-top: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div class="login-container" id="loginContainer">
+        <h1><i class="fas fa-star"></i> Familien-Punkte System</h1>
+        <div class="form-group">
+            <label for="loginEmail">E-Mail</label>
+            <input type="email" id="loginEmail" placeholder="max@familie.de" required>
+        </div>
+        <div class="form-group">
+            <label for="loginPassword">Passwort</label>
+            <input type="password" id="loginPassword" placeholder="Passwort" required>
+        </div>
+        <button class="btn btn-primary" id="loginBtn">Einloggen</button>
+        <p style="margin-top: 20px; color: #666;">Demo-Zugänge:<br>
+        <strong>Admin:</strong> admin@familie.de / passwort123<br>
+        <strong>Kind:</strong> max@familie.de / passwort123</p>
+    </div>
+    
+    <!-- Main App (initially hidden) -->
+    <div class="container app-container" id="appContainer">
+        <header>
+            <div>
+                <h1 id="appTitle">Willkommen!</h1>
+                <p id="userRole"></p>
+            </div>
+            <div class="user-info">
+                <div id="userName">Max Mustermann</div>
+                <div id="userPoints">Punkte: <span id="pointsCount">0</span></div>
+                <button class="btn btn-danger" id="logoutBtn">Ausloggen</button>
+            </div>
+        </header>
+        
+        <div class="points-display">
+            <div class="total-points" id="totalPoints">0</div>
+            <p>Deine Gesamtpunkte</p>
+        </div>
+        
+        <div class="actions">
+            <button class="action-btn btn-primary" id="addTaskBtn">
+                <i class="fas fa-plus-circle"></i>
+                Aufgabe hinzufügen
+            </button>
+            <button class="action-btn btn-secondary" id="addRewardBtn">
+                <i class="fas fa-gift"></i>
+                Belohnung hinzufügen
+            </button>
+        </div>
+        
+        <div class="section">
+            <h2><i class="fas fa-tasks"></i> Meine Aufgaben</h2>
+            <div class="loading" id="tasksLoading">Lade Aufgaben...</div>
+            <div id="tasksList"></div>
+        </div>
+        
+        <div class="section">
+            <h2><i class="fas fa-award"></i> Verfügbare Belohnungen</h2>
+            <div class="loading" id="rewardsLoading">Lade Belohnungen...</div>
+            <div id="rewardsList"></div>
+        </div>
+        
+        <!-- Admin Section -->
+        <div class="section admin-only">
+            <h2><i class="fas fa-users-cog"></i> Admin-Bereich</h2>
+            <button class="btn btn-secondary" id="manageUsersBtn">Benutzer verwalten</button>
+            <button class="btn btn-secondary" id="viewAllTasksBtn">Alle Aufgaben anzeigen</button>
+        </div>
+    </div>
+    
+    <!-- Modals -->
+    <div class="modal" id="taskModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Neue Aufgabe</h2>
+                <button class="close-btn" id="closeTaskModal">&times;</button>
+            </div>
+            <div class="form-group">
+                <label for="taskTitle">Aufgabenbeschreibung</label>
+                <input type="text" id="taskTitle" placeholder="z.B. Zimmer aufräumen" required>
+            </div>
+            <div class="form-group">
+                <label for="taskPoints">Punkte</label>
+                <input type="number" id="taskPoints" min="1" max="100" value="10" required>
+            </div>
+            <div class="form-group">
+                <label for="taskAssignedTo">Zugewiesen an</label>
+                <select id="taskAssignedTo"></select>
+            </div>
+            <button class="btn btn-primary" id="saveTaskBtn">Aufgabe speichern</button>
+        </div>
+    </div>
+    
+    <div class="modal" id="rewardModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Neue Belohnung</h2>
+                <button class="close-btn" id="closeRewardModal">&times;</button>
+            </div>
+            <div class="form-group">
+                <label for="rewardTitle">Belohnungsbeschreibung</label>
+                <input type="text" id="rewardTitle" placeholder="z.B. 30 min extra Bildschirmzeit" required>
+            </div>
+            <div class="form-group">
+                <label for="rewardPoints">Punktekosten</label>
+                <input type="number" id="rewardPoints" min="1" max="1000" value="50" required>
+            </div>
+            <button class="btn btn-primary" id="saveRewardBtn">Belohnung speichern</button>
+        </div>
+    </div>
+    
+    <div class="modal" id="userModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Benutzer verwalten</h2>
+                <button class="close-btn" id="closeUserModal">&times;</button>
+            </div>
+            <div class="form-group">
+                <label for="newUserName">Name</label>
+                <input type="text" id="newUserName" placeholder="Max" required>
+            </div>
+            <div class="form-group">
+                <label for="newUserEmail">E-Mail</label>
+                <input type="email" id="newUserEmail" placeholder="max@familie.de" required>
+            </div>
+            <div class="form-group">
+                <label for="newUserPassword">Passwort</label>
+                <input type="password" id="newUserPassword" placeholder="Passwort" required>
+            </div>
+            <div class="form-group">
+                <label for="newUserRole">Rolle</label>
+                <select id="newUserRole">
+                    <option value="child">Kind</option>
+                    <option value="admin">Admin</option>
+                </select>
+            </div>
+            <button class="btn btn-primary" id="saveUserBtn">Benutzer erstellen</button>
+            <div id="usersList" style="margin-top: 20px;"></div>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+
+    <script>
+        // 🔥 Firebase Konfiguration - HIER DEINE DATEN EINTRAGEN!
+        // Diese Daten findest du in deinem Firebase-Projekt unter "Projekteinstellungen"
+        const firebaseConfig = {
+  apiKey: "AIzaSyDt2FY1783Z_trO_8wERHjlaTsYeOzNASM",
+  authDomain: "punkteapp-ada6b.firebaseapp.com",
+  projectId: "punkteapp-ada6b",
+  storageBucket: "punkteapp-ada6b.firebasestorage.app",
+  messagingSenderId: "165157674759",
+  appId: "1:165157674759:web:dc515d6630f1ff68d62fa2"
+};
+
+        // Firebase initialisieren
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // App State
+        let currentUser = null;
+        let allUsers = [];
+        let currentUserTasks = [];
+        let allRewards = [];
+
+        // DOM Elemente
+        const loginContainer = document.getElementById('loginContainer');
+        const appContainer = document.getElementById('appContainer');
+        const loginBtn = document.getElementById('loginBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const tasksList = document.getElementById('tasksList');
+        const rewardsList = document.getElementById('rewardsList');
+        const userModal = document.getElementById('userModal');
+
+        // 🔐 Login System
+        loginBtn.addEventListener('click', async () => {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            try {
+                const userCredential = await auth.signInWithEmailAndPassword(email, password);
+                currentUser = userCredential.user;
+                await loadUserData();
+                showApp();
+            } catch (error) {
+                alert('Login fehlgeschlagen: ' + error.message);
+            }
+        });
+
+        // 👋 Logout System
+        logoutBtn.addEventListener('click', () => {
+            auth.signOut();
+            currentUser = null;
+            showLogin();
+        });
+
+        // 📱 UI Management
+        function showApp() {
+            loginContainer.style.display = 'none';
+            appContainer.style.display = 'block';
+            document.getElementById('appTitle').textContent = `Hallo ${currentUser.displayName || currentUser.email}`;
+            document.getElementById('userName').textContent = currentUser.displayName || currentUser.email;
+            
+            // Admin-Bereich anzeigen/verstecken
+            if (currentUser.role === 'admin') {
+                appContainer.classList.add('admin-visible');
+                document.getElementById('userRole').textContent = 'Admin';
+                loadAllUsers();
+            } else {
+                appContainer.classList.remove('admin-visible');
+                document.getElementById('userRole').textContent = 'Kind';
+            }
+            
+            updatePointsDisplay();
+            loadTasks();
+            loadRewards();
+        }
+
+        function showLogin() {
+            loginContainer.style.display = 'block';
+            appContainer.style.display = 'none';
+            document.getElementById('loginEmail').value = '';
+            document.getElementById('loginPassword').value = '';
+        }
+
+        // 📊 Daten laden
+        async function loadUserData() {
+            const userDoc = await db.collection('users').doc(currentUser.uid).get();
+            if (userDoc.exists) {
+                currentUser = { ...currentUser, ...userDoc.data() };
+            } else {
+                // Standardrolle für neue Benutzer
+                currentUser.role = 'child';
+                await db.collection('users').doc(currentUser.uid).set({
+                    email: currentUser.email,
+                    displayName: currentUser.email.split('@')[0],
+                    role: 'child',
+                    points: 0,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            }
+        }
+
+        async function loadTasks() {
+            document.getElementById('tasksLoading').style.display = 'block';
+            tasksList.innerHTML = '';
+            
+            let query;
+            if (currentUser.role === 'admin') {
+                // Admin sieht alle Aufgaben
+                query = db.collection('tasks').where('completed', '==', false);
+            } else {
+                // Kind sieht nur seine eigenen Aufgaben
+                query = db.collection('tasks')
+                    .where('assignedTo', '==', currentUser.uid)
+                    .where('completed', '==', false);
+            }
+            
+            const snapshot = await query.get();
+            currentUserTasks = [];
+            
+            snapshot.forEach(doc => {
+                const task = { id: doc.id, ...doc.data() };
+                currentUserTasks.push(task);
+                renderTask(task);
+            });
+            
+            document.getElementById('tasksLoading').style.display = 'none';
+        }
+
+        async function loadRewards() {
+            document.getElementById('rewardsLoading').style.display = 'block';
+            rewardsList.innerHTML = '';
+            
+            const snapshot = await db.collection('rewards')
+                .where('active', '==', true)
+                .get();
+            
+            allRewards = [];
+            snapshot.forEach(doc => {
+                const reward = { id: doc.id, ...doc.data() };
+                allRewards.push(reward);
+                renderReward(reward);
+            });
+            
+            document.getElementById('rewardsLoading').style.display = 'none';
+        }
+
+        async function loadAllUsers() {
+            const snapshot = await db.collection('users').get();
+            allUsers = [];
+            const select = document.getElementById('taskAssignedTo');
+            select.innerHTML = '';
+            
+            snapshot.forEach(doc => {
+                const user = { id: doc.id, ...doc.data() };
+                allUsers.push(user);
+                
+                // Für Admin: Dropdown für Aufgaben-Zuweisung füllen
+                const option = document.createElement('option');
+                option.value = doc.id;
+                option.textContent = `${user.displayName} (${user.role})`;
+                select.appendChild(option);
+            });
+        }
+
+        // 🎨 UI Rendering
+        function renderTask(task) {
+            const taskElement = document.createElement('div');
+            taskElement.className = 'task-item';
+            taskElement.id = `task-${task.id}`;
+            
+            let assignedName = 'Mir';
+            if (currentUser.role === 'admin') {
+                const assignedUser = allUsers.find(u => u.id === task.assignedTo);
+                assignedName = assignedUser ? assignedUser.displayName : 'Unbekannt';
+            }
+            
+            taskElement.innerHTML = `
+                <div class="task-info">
+                    <div class="task-title">${task.title}</div>
+                    <div>${assignedName} • ${task.points} Punkte</div>
+                </div>
+                <div class="task-points">+${task.points}</div>
+                <div class="task-actions">
+                    ${currentUser.role === 'child' ? `
+                    <button class="icon-btn complete-btn" onclick="completeTask('${task.id}', ${task.points})">
+                        <i class="fas fa-check"></i>
+                    </button>
+                    ` : ''}
+                    ${currentUser.role === 'admin' ? `
+                    <button class="icon-btn delete-btn" onclick="deleteTask('${task.id}')">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                    ` : ''}
+                </div>
+            `;
+            
+            tasksList.appendChild(taskElement);
+        }
+
+        function renderReward(reward) {
+            const rewardElement = document.createElement('div');
+            rewardElement.className = 'reward-item';
+            rewardElement.id = `reward-${reward.id}`;
+            
+            const canAfford = currentUser.points >= reward.points;
+            
+            rewardElement.innerHTML = `
+                <div class="reward-info">
+                    <div class="reward-title">${reward.title}</div>
+                    <div>${reward.description || ''}</div>
+                </div>
+                <div class="reward-points">${reward.points} Punkte</div>
+                <div class="reward-actions">
+                    <button class="icon-btn redeem-btn" 
+                            onclick="redeemReward('${reward.id}', ${reward.points})"
+                            ${!canAfford ? 'disabled style="opacity:0.5;"' : ''}>
+                        <i class="fas fa-shopping-cart"></i>
+                    </button>
+                </div>
+            `;
+            
+            rewardsList.appendChild(rewardElement);
+        }
+
+        // ✅ Task Management
+        window.completeTask = async function(taskId, points) {
+            try {
+                // Aufgabe als erledigt markieren
+                await db.collection('tasks').doc(taskId).update({
+                    completed: true,
+                    completedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    completedBy: currentUser.uid
+                });
+                
+                // Punkte dem Kind gutschreiben
+                await db.collection('users').doc(currentUser.uid).update({
+                    points: firebase.firestore.FieldValue.increment(points)
+                });
+                
+                // Lokale Daten aktualisieren
+                currentUser.points += points;
+                updatePointsDisplay();
+                
+                // Task aus der Liste entfernen
+                document.getElementById(`task-${taskId}`).remove();
+                
+                alert(`Super! Du hast ${points} Punkte verdient!`);
+            } catch (error) {
+                alert('Fehler: ' + error.message);
+            }
+        };
+
+        // 🎁 Reward Management
+        window.redeemReward = async function(rewardId, points) {
+            if (currentUser.points < points) {
+                alert('Nicht genug Punkte!');
+                return;
+            }
+            
+            if (!confirm(`Möchtest du diese Belohnung für ${points} Punkte einlösen?`)) return;
+            
+            try {
+                // Punkte abziehen
+                await db.collection('users').doc(currentUser.uid).update({
+                    points: firebase.firestore.FieldValue.increment(-points)
+                });
+                
+                // Belohnung als eingelöst markieren
+                await db.collection('rewards').doc(rewardId).update({
+                    redeemedBy: firebase.firestore.FieldValue.arrayUnion(currentUser.uid),
+                    lastRedeemed: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                // Lokale Daten aktualisieren
+                currentUser.points -= points;
+                updatePointsDisplay();
+                
+                // Verlauf speichern
+                await db.collection('history').add({
+                    userId: currentUser.uid,
+                    type: 'reward_redeemed',
+                    points: -points,
+                    description: `Belohnung eingelöst: ${document.querySelector(`#reward-${rewardId} .reward-title`).textContent}`,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                alert('Belohnung erfolgreich eingelöst!');
+            } catch (error) {
+                alert('Fehler: ' + error.message);
+            }
+        };
+
+        // ✨ Admin Functions
+        window.deleteTask = async function(taskId) {
+            if (!confirm('Aufgabe wirklich löschen?')) return;
+            
+            await db.collection('tasks').doc(taskId).delete();
+            document.getElementById(`task-${taskId}`).remove();
+        };
+
+        // 📝 Modal Management
+        document.getElementById('addTaskBtn').addEventListener('click', () => {
+            if (currentUser.role !== 'admin') {
+                alert('Nur Admins können Aufgaben hinzufügen');
+                return;
+            }
+            document.getElementById('taskModal').style.display = 'flex';
+        });
+
+        document.getElementById('addRewardBtn').addEventListener('click', () => {
+            if (currentUser.role !== 'admin') {
+                alert('Nur Admins können Belohnungen hinzufügen');
+                return;
+            }
+            document.getElementById('rewardModal').style.display = 'flex';
+        });
+
+        document.getElementById('manageUsersBtn').addEventListener('click', () => {
+            document.getElementById('userModal').style.display = 'flex';
+            loadUsersList();
+        });
+
+        // 💾 Save Functions
+        document.getElementById('saveTaskBtn').addEventListener('click', async () => {
+            const title = document.getElementById('taskTitle').value;
+            const points = parseInt(document.getElementById('taskPoints').value);
+            const assignedTo = document.getElementById('taskAssignedTo').value;
+            
+            if (!title || !points || !assignedTo) {
+                alert('Bitte alle Felder ausfüllen');
+                return;
+            }
+            
+            try {
+                await db.collection('tasks').add({
+                    title: title,
+                    points: points,
+                    assignedTo: assignedTo,
+                    createdBy: currentUser.uid,
+                    completed: false,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                document.getElementById('taskModal').style.display = 'none';
+                document.getElementById('taskTitle').value = '';
+                document.getElementById('taskPoints').value = '10';
+                
+                loadTasks();
+                alert('Aufgabe erfolgreich erstellt!');
+            } catch (error) {
+                alert('Fehler: ' + error.message);
+            }
+        });
+
+        document.getElementById('saveRewardBtn').addEventListener('click', async () => {
+            const title = document.getElementById('rewardTitle').value;
+            const points = parseInt(document.getElementById('rewardPoints').value);
+            
+            if (!title || !points) {
+                alert('Bitte alle Felder ausfüllen');
+                return;
+            }
+            
+            try {
+                await db.collection('rewards').add({
+                    title: title,
+                    points: points,
+                    active: true,
+                    createdBy: currentUser.uid,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                document.getElementById('rewardModal').style.display = 'none';
+                document.getElementById('rewardTitle').value = '';
+                document.getElementById('rewardPoints').value = '50';
+                
+                loadRewards();
+                alert('Belohnung erfolgreich erstellt!');
+            } catch (error) {
+                alert('Fehler: ' + error.message);
+            }
+        });
+
+        document.getElementById('saveUserBtn').addEventListener('click', async () => {
+            const name = document.getElementById('newUserName').value;
+            const email = document.getElementById('newUserEmail').value;
+            const password = document.getElementById('newUserPassword').value;
+            const role = document.getElementById('newUserRole').value;
+            
+            if (!name || !email || !password) {
+                alert('Bitte alle Felder ausfüllen');
+                return;
+            }
+            
+            try {
+                // Benutzer in Firebase Auth erstellen
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                
+                // Benutzerdaten in Firestore speichern
+                await db.collection('users').doc(userCredential.user.uid).set({
+                    email: email,
+                    displayName: name,
+                    role: role,
+                    points: 0,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    createdBy: currentUser.uid
+                });
+                
+                // Formular zurücksetzen
+                document.getElementById('newUserName').value = '';
+                document.getElementById('newUserEmail').value = '';
+                document.getElementById('newUserPassword').value = '';
+                
+                // Benutzerliste aktualisieren
+                loadAllUsers();
+                loadUsersList();
+                
+                alert('Benutzer erfolgreich erstellt!');
+            } catch (error) {
+                alert('Fehler: ' + error.message);
+            }
+        });
+
+        async function loadUsersList() {
+            const usersListDiv = document.getElementById('usersList');
+            usersListDiv.innerHTML = '<h3>Bestehende Benutzer:</h3>';
+            
+            const snapshot = await db.collection('users').get();
+            snapshot.forEach(doc => {
+                const user = doc.data();
+                const userElement = document.createElement('div');
+                userElement.style.padding = '10px';
+                userElement.style.borderBottom = '1px solid #eee';
+                userElement.innerHTML = `
+                    <strong>${user.displayName}</strong> (${user.email})<br>
+                    Rolle: ${user.role} • Punkte: ${user.points || 0}
+                `;
+                usersListDiv.appendChild(userElement);
+            });
+        }
+
+        // 📊 Helper Functions
+        function updatePointsDisplay() {
+            if (currentUser && currentUser.points !== undefined) {
+                document.getElementById('totalPoints').textContent = currentUser.points;
+                document.getElementById('pointsCount').textContent = currentUser.points;
+            }
+        }
+
+        // 🚪 Modal Close Events
+        document.getElementById('closeTaskModal').addEventListener('click', () => {
+            document.getElementById('taskModal').style.display = 'none';
+        });
+
+        document.getElementById('closeRewardModal').addEventListener('click', () => {
+            document.getElementById('rewardModal').style.display = 'none';
+        });
+
+        document.getElementById('closeUserModal').addEventListener('click', () => {
+            document.getElementById('userModal').style.display = 'none';
+        });
+
+        // Klick außerhalb vom Modal schließt es
+        window.addEventListener('click', (event) => {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        });
+
+        // 👁️ Auth State Observer
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                currentUser = user;
+                loadUserData().then(() => {
+                    showApp();
+                });
+            } else {
+                showLogin();
+            }
+        });
+
+        // Demo-Daten für den ersten Start
+        async function initializeDemoData() {
+            // Prüfen, ob bereits Daten existieren
+            const usersSnapshot = await db.collection('users').get();
+            if (usersSnapshot.size === 0) {
+                // Demo-Admin erstellen
+                try {
+                    const adminCredential = await auth.createUserWithEmailAndPassword(
+                        'admin@familie.de', 
+                        'passwort123'
+                    );
+                    
+                    await db.collection('users').doc(adminCredential.user.uid).set({
+                        email: 'admin@familie.de',
+                        displayName: 'Admin',
+                        role: 'admin',
+                        points: 0,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    
+                    // Demo-Kind erstellen
+                    const childCredential = await auth.createUserWithEmailAndPassword(
+                        'max@familie.de',
+                        'passwort123'
+                    );
+                    
+                    await db.collection('users').doc(childCredential.user.uid).set({
+                        email: 'max@familie.de',
+                        displayName: 'Max',
+                        role: 'child',
+                        points: 100,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    
+                    // Ausloggen, damit sich der User einloggen kann
+                    auth.signOut();
+                    
+                    alert('Demo-Daten wurden erstellt!\nAdmin: admin@familie.de / passwort123\nKind: max@familie.de / passwort123');
+                } catch (error) {
+                    console.log('Demo-Daten konnten nicht erstellt werden:', error);
+                }
+            }
+        }
+
+        // App starten
+        initializeDemoData();
+    </script>
+</body>
+</html>
