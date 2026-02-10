@@ -469,21 +469,26 @@
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
 
     <script>
-// 🔥 Firebase Konfiguration - HIER DEINE DATEN EINTRAGEN!
-// Diese Daten findest du in deinem Firebase-Projekt unter "Projekteinstellungen"
-const firebaseConfig = {
-    apiKey: "AIzaSyBjn0biBBwfG8TyMhFPyPgqspHZPK846ts",
-    authDomain: "punkteapp-94a9c.firebaseapp.com",
-    projectId: "punkteapp-94a9c",
-    storageBucket: "punkteapp-94a9c.firebasestorage.app",
-    messagingSenderId: "970130888345",
-    appId: "1:970130888345:web:d82545cf67a24951270a08"
-};
+        // 🔥 Firebase Konfiguration - HIER DEINE DATEN EINTRAGEN!
+        // Diese Daten findest du in deinem Firebase-Projekt unter "Projekteinstellungen"
+        const firebaseConfig = {
+            apiKey: "AIzaSyBjn0biBBwfG8TyMhFPyPgqspHZPK846ts",
+            authDomain: "punkteapp-94a9c.firebaseapp.com",
+            projectId: "punkteapp-94a9c",
+            storageBucket: "punkteapp-94a9c.firebasestorage.app",
+            messagingSenderId: "970130888345",
+            appId: "1:970130888345:web:d82545cf67a24951270a08"
+        };
 
-// Firebase initialisieren
-      firebase.initializeApp(firebaseConfig);
-       const auth = firebase.auth();
-       const db = firebase.firestore();
+        // Firebase initialisieren
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // Debug-Info
+        console.log("Firebase initialisiert:", firebase.apps.length > 0);
+        console.log("Auth verfügbar:", auth !== null);
+        console.log("DB verfügbar:", db !== null);
 
         // App State
         let currentUser = null;
@@ -790,23 +795,40 @@ const firebaseConfig = {
             loadUsersList();
         });
 
-        // 💾 Save Functions
+        // 💾 Save Functions - KORRIGIERTE VERSION
         document.getElementById('saveTaskBtn').addEventListener('click', async () => {
             const title = document.getElementById('taskTitle').value;
             const points = parseInt(document.getElementById('taskPoints').value);
             const assignedTo = document.getElementById('taskAssignedTo').value;
+            
+            console.log("DEBUG: currentUser =", currentUser);
+            console.log("DEBUG: auth.currentUser =", auth.currentUser);
             
             if (!title || !points || !assignedTo) {
                 alert('Bitte alle Felder ausfüllen');
                 return;
             }
             
+            // WICHTIG: Verwende auth.currentUser statt currentUser
+            const user = auth.currentUser;
+            if (!user || !user.uid) {
+                alert('Fehler: Nicht eingeloggt! Bitte neu einloggen.');
+                auth.signOut();
+                showLogin();
+                return;
+            }
+            
             try {
+                // Hole zusätzlich den aktuellen User-Datensatz für den Namen
+                const userDoc = await db.collection('users').doc(user.uid).get();
+                const userName = userDoc.exists ? userDoc.data().displayName : user.email;
+                
                 await db.collection('tasks').add({
                     title: title,
                     points: points,
                     assignedTo: assignedTo,
-                    createdBy: currentUser.uid,
+                    createdBy: user.uid,
+                    createdByName: userName,
                     completed: false,
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
@@ -818,6 +840,7 @@ const firebaseConfig = {
                 loadTasks();
                 alert('Aufgabe erfolgreich erstellt!');
             } catch (error) {
+                console.error("FEHLER beim Speichern:", error);
                 alert('Fehler: ' + error.message);
             }
         });
@@ -832,11 +855,14 @@ const firebaseConfig = {
             }
             
             try {
+                // Verwende auth.currentUser für createdBy
+                const user = auth.currentUser;
+                
                 await db.collection('rewards').add({
                     title: title,
                     points: points,
                     active: true,
-                    createdBy: currentUser.uid,
+                    createdBy: user ? user.uid : 'unknown',
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
                 
@@ -847,6 +873,7 @@ const firebaseConfig = {
                 loadRewards();
                 alert('Belohnung erfolgreich erstellt!');
             } catch (error) {
+                console.error("Fehler beim Erstellen der Belohnung:", error);
                 alert('Fehler: ' + error.message);
             }
         });
@@ -873,7 +900,7 @@ const firebaseConfig = {
                     role: role,
                     points: 0,
                     createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    createdBy: currentUser.uid
+                    createdBy: auth.currentUser ? auth.currentUser.uid : 'system'
                 });
                 
                 // Formular zurücksetzen
