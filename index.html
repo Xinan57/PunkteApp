@@ -469,21 +469,21 @@
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
 
     <script>
-        // 🔥 Firebase Konfiguration - HIER DEINE DATEN EINTRAGEN!
-        // Diese Daten findest du in deinem Firebase-Projekt unter "Projekteinstellungen"
-        const firebaseConfig = {
-            apiKey: "AIzaSyBjn0biBBwfG8TyMhFPyPgqspHZPK846ts",
-  	        authDomain: "punkteapp-94a9c.firebaseapp.com",
-            projectId: "punkteapp-94a9c",
-            storageBucket: "punkteapp-94a9c.firebasestorage.app",
-            messagingSenderId: "970130888345",
-            appId: "1:970130888345:web:d82545cf67a24951270a08"
+// 🔥 Firebase Konfiguration - HIER DEINE DATEN EINTRAGEN!
+// Diese Daten findest du in deinem Firebase-Projekt unter "Projekteinstellungen"
+const firebaseConfig = {
+    apiKey: "AIzaSyBjn0biBBwfG8TyMhFPyPgqspHZPK846ts",
+    authDomain: "punkteapp-94a9c.firebaseapp.com",
+    projectId: "punkteapp-94a9c",
+    storageBucket: "punkteapp-94a9c.firebasestorage.app",
+    messagingSenderId: "970130888345",
+    appId: "1:970130888345:web:d82545cf67a24951270a08"
 };
 
-        // Firebase initialisieren
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
+// Firebase initialisieren
+      firebase.initializeApp(firebaseConfig);
+       const auth = firebase.auth();
+       const db = firebase.firestore();
 
         // App State
         let currentUser = null;
