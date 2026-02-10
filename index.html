@@ -307,6 +307,16 @@
             color: var(--secondary);
         }
         
+        /* Error */
+        .error {
+            color: var(--danger);
+            text-align: center;
+            padding: 10px;
+            background: #ffebee;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        
         @media (max-width: 600px) {
             .actions {
                 grid-template-columns: 1fr;
@@ -328,30 +338,37 @@
     <!-- Login Screen -->
     <div class="login-container" id="loginContainer">
         <h1><i class="fas fa-star"></i> Familien-Punkte System</h1>
+        <div id="firebaseError" class="error" style="display: none;"></div>
         <div class="form-group">
             <label for="loginEmail">E-Mail</label>
-            <input type="email" id="loginEmail" placeholder="max@familie.de" required>
+            <input type="email" id="loginEmail" placeholder="deine-email@familie.de" required>
         </div>
         <div class="form-group">
             <label for="loginPassword">Passwort</label>
             <input type="password" id="loginPassword" placeholder="Passwort" required>
         </div>
         <button class="btn btn-primary" id="loginBtn">Einloggen</button>
-        <p style="margin-top: 20px; color: #666;">Demo-Zugänge:<br>
-        <strong>Admin:</strong> admin@familie.de / passwort123<br>
-        <strong>Kind:</strong> max@familie.de / passwort123</p>
+        <button class="btn btn-secondary" id="registerBtn" style="margin-top: 10px;">
+            Ersten Account erstellen
+        </button>
+        <div id="demoInfo" style="margin-top: 20px; padding: 15px; background: #e8f5e9; border-radius: 8px;">
+            <h3 style="margin-bottom: 10px;">⚠️ WICHTIG vor dem ersten Login:</h3>
+            <p>1. Klicke auf <strong>"Ersten Account erstellen"</strong></p>
+            <p>2. Gib deine E-Mail und Passwort ein</p>
+            <p>3. Du wirst automatisch als <strong>Admin</strong> erstellt</p>
+        </div>
     </div>
     
     <!-- Main App (initially hidden) -->
     <div class="container app-container" id="appContainer">
         <header>
             <div>
-                <h1 id="appTitle">Willkommen!</h1>
+                <h1 id="appTitle">Familien-Punkte System</h1>
                 <p id="userRole"></p>
             </div>
             <div class="user-info">
-                <div id="userName">Max Mustermann</div>
-                <div id="userPoints">Punkte: <span id="pointsCount">0</span></div>
+                <div id="userName">Lädt...</div>
+                <div>Punkte: <span id="pointsCount">0</span></div>
                 <button class="btn btn-danger" id="logoutBtn">Ausloggen</button>
             </div>
         </header>
@@ -376,19 +393,25 @@
             <h2><i class="fas fa-tasks"></i> Meine Aufgaben</h2>
             <div class="loading" id="tasksLoading">Lade Aufgaben...</div>
             <div id="tasksList"></div>
+            <div id="noTasks" style="text-align: center; color: #777; padding: 20px; display: none;">
+                Noch keine Aufgaben. Als Admin kannst du welche hinzufügen!
+            </div>
         </div>
         
         <div class="section">
             <h2><i class="fas fa-award"></i> Verfügbare Belohnungen</h2>
             <div class="loading" id="rewardsLoading">Lade Belohnungen...</div>
             <div id="rewardsList"></div>
+            <div id="noRewards" style="text-align: center; color: #777; padding: 20px; display: none;">
+                Noch keine Belohnungen. Als Admin kannst du welche hinzufügen!
+            </div>
         </div>
         
         <!-- Admin Section -->
         <div class="section admin-only">
             <h2><i class="fas fa-users-cog"></i> Admin-Bereich</h2>
             <button class="btn btn-secondary" id="manageUsersBtn">Benutzer verwalten</button>
-            <button class="btn btn-secondary" id="viewAllTasksBtn">Alle Aufgaben anzeigen</button>
+            <button class="btn btn-secondary" id="addChildBtn">Kind hinzufügen</button>
         </div>
     </div>
     
@@ -439,27 +462,32 @@
                 <h2>Benutzer verwalten</h2>
                 <button class="close-btn" id="closeUserModal">&times;</button>
             </div>
-            <div class="form-group">
-                <label for="newUserName">Name</label>
-                <input type="text" id="newUserName" placeholder="Max" required>
+            <div id="currentUsers" style="margin-bottom: 20px;">
+                <h3>Aktuelle Benutzer:</h3>
+                <div id="usersList"></div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal" id="childModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Neues Kind hinzufügen</h2>
+                <button class="close-btn" id="closeChildModal">&times;</button>
             </div>
             <div class="form-group">
-                <label for="newUserEmail">E-Mail</label>
-                <input type="email" id="newUserEmail" placeholder="max@familie.de" required>
+                <label for="childName">Name des Kindes</label>
+                <input type="text" id="childName" placeholder="z.B. Lisa" required>
             </div>
             <div class="form-group">
-                <label for="newUserPassword">Passwort</label>
-                <input type="password" id="newUserPassword" placeholder="Passwort" required>
+                <label for="childEmail">E-Mail</label>
+                <input type="email" id="childEmail" placeholder="lisa@familie.de" required>
             </div>
             <div class="form-group">
-                <label for="newUserRole">Rolle</label>
-                <select id="newUserRole">
-                    <option value="child">Kind</option>
-                    <option value="admin">Admin</option>
-                </select>
+                <label for="childPassword">Passwort</label>
+                <input type="password" id="childPassword" placeholder="Passwort" required>
             </div>
-            <button class="btn btn-primary" id="saveUserBtn">Benutzer erstellen</button>
-            <div id="usersList" style="margin-top: 20px;"></div>
+            <button class="btn btn-primary" id="saveChildBtn">Kind erstellen</button>
         </div>
     </div>
 
@@ -469,8 +497,9 @@
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
 
     <script>
-        // 🔥 Firebase Konfiguration - HIER DEINE DATEN EINTRAGEN!
-        // Diese Daten findest du in deinem Firebase-Projekt unter "Projekteinstellungen"
+        // Firebase
+      
+        
         const firebaseConfig = {
   apiKey: "AIzaSyDt2FY1783Z_trO_8wERHjlaTsYeOzNASM",
   authDomain: "punkteapp-ada6b.firebaseapp.com",
@@ -479,160 +508,247 @@
   messagingSenderId: "165157674759",
   appId: "1:165157674759:web:dc515d6630f1ff68d62fa2"
 };
+        // Bis hier FIrebase
 
         // Firebase initialisieren
-        firebase.initializeApp(firebaseConfig);
+        try {
+            firebase.initializeApp(firebaseConfig);
+            console.log("✅ Firebase initialisiert!");
+        } catch (error) {
+            document.getElementById('firebaseError').innerHTML = 
+                "❌ Firebase-Fehler: " + error.message + "<br>" +
+                "Bitte Firebase-Konfiguration überprüfen!";
+            document.getElementById('firebaseError').style.display = 'block';
+            console.error("Firebase Fehler:", error);
+        }
+        
         const auth = firebase.auth();
         const db = firebase.firestore();
-
+        
         // App State
         let currentUser = null;
         let allUsers = [];
-        let currentUserTasks = [];
-        let allRewards = [];
 
-        // DOM Elemente
-        const loginContainer = document.getElementById('loginContainer');
-        const appContainer = document.getElementById('appContainer');
-        const loginBtn = document.getElementById('loginBtn');
-        const logoutBtn = document.getElementById('logoutBtn');
-        const tasksList = document.getElementById('tasksList');
-        const rewardsList = document.getElementById('rewardsList');
-        const userModal = document.getElementById('userModal');
+        // 🔐 REGISTRIERUNG - ERSTEN ACCOUNT ERSTELLEN
+        document.getElementById('registerBtn').addEventListener('click', async () => {
+            const email = prompt("Gib deine E-Mail-Adresse ein:", "eltern@familie.de");
+            if (!email) return;
+            
+            const password = prompt("Gib ein Passwort ein (mind. 6 Zeichen):", "passwort123");
+            if (!password || password.length < 6) {
+                alert("Passwort muss mindestens 6 Zeichen haben!");
+                return;
+            }
+            
+            const name = prompt("Gib deinen Namen ein:", "Eltern");
+            if (!name) return;
+            
+            try {
+                // 1. User in Firebase Authentication erstellen
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                const user = userCredential.user;
+                
+                // 2. User in Firestore als Admin speichern
+                await db.collection('users').doc(user.uid).set({
+                    email: email,
+                    displayName: name,
+                    role: 'admin',
+                    points: 0,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                alert('✅ Account erfolgreich erstellt!\nDu wirst automatisch eingeloggt.');
+                // Automatisch einloggen
+                currentUser = { ...user, role: 'admin', displayName: name, points: 0 };
+                showApp();
+                
+            } catch (error) {
+                let errorMsg = "Fehler: ";
+                if (error.code === 'auth/email-already-in-use') {
+                    errorMsg = "Diese E-Mail ist bereits registriert. Bitte einloggen.";
+                } else if (error.code === 'auth/invalid-email') {
+                    errorMsg = "Ungültige E-Mail-Adresse.";
+                } else if (error.code === 'auth/weak-password') {
+                    errorMsg = "Passwort zu schwach (mind. 6 Zeichen).";
+                } else {
+                    errorMsg += error.message;
+                }
+                alert(errorMsg);
+            }
+        });
 
-        // 🔐 Login System
-        loginBtn.addEventListener('click', async () => {
+        // 🔐 LOGIN
+        document.getElementById('loginBtn').addEventListener('click', async () => {
             const email = document.getElementById('loginEmail').value;
             const password = document.getElementById('loginPassword').value;
             
+            if (!email || !password) {
+                alert("Bitte E-Mail und Passwort eingeben!");
+                return;
+            }
+            
             try {
                 const userCredential = await auth.signInWithEmailAndPassword(email, password);
-                currentUser = userCredential.user;
-                await loadUserData();
-                showApp();
+                const user = userCredential.user;
+                
+                // User-Daten aus Firestore laden
+                const userDoc = await db.collection('users').doc(user.uid).get();
+                
+                if (userDoc.exists) {
+                    currentUser = { 
+                        uid: user.uid,
+                        email: user.email,
+                        ...userDoc.data() 
+                    };
+                    showApp();
+                } else {
+                    // Fallback: Wenn User in Firestore nicht existiert
+                    currentUser = {
+                        uid: user.uid,
+                        email: user.email,
+                        displayName: user.email.split('@')[0],
+                        role: 'child',
+                        points: 0
+                    };
+                    showApp();
+                }
+                
             } catch (error) {
-                alert('Login fehlgeschlagen: ' + error.message);
+                let errorMsg = "Login fehlgeschlagen: ";
+                if (error.code === 'auth/user-not-found') {
+                    errorMsg = "Benutzer nicht gefunden. Klicke auf 'Ersten Account erstellen'!";
+                } else if (error.code === 'auth/wrong-password') {
+                    errorMsg = "Falsches Passwort!";
+                } else if (error.code === 'auth/invalid-email') {
+                    errorMsg = "Ungültige E-Mail-Adresse!";
+                } else {
+                    errorMsg += error.message;
+                }
+                alert(errorMsg);
             }
         });
 
-        // 👋 Logout System
-        logoutBtn.addEventListener('click', () => {
+        // 👋 LOGOUT
+        document.getElementById('logoutBtn').addEventListener('click', () => {
             auth.signOut();
-            currentUser = null;
-            showLogin();
         });
 
-        // 📱 UI Management
+        // 📱 UI ANZEIGEN
         function showApp() {
-            loginContainer.style.display = 'none';
-            appContainer.style.display = 'block';
-            document.getElementById('appTitle').textContent = `Hallo ${currentUser.displayName || currentUser.email}`;
-            document.getElementById('userName').textContent = currentUser.displayName || currentUser.email;
+            document.getElementById('loginContainer').style.display = 'none';
+            document.getElementById('appContainer').style.display = 'block';
+            
+            // Benutzerinfo anzeigen
+            document.getElementById('appTitle').textContent = `Hallo ${currentUser.displayName}!`;
+            document.getElementById('userName').textContent = currentUser.displayName;
+            document.getElementById('pointsCount').textContent = currentUser.points || 0;
+            document.getElementById('totalPoints').textContent = currentUser.points || 0;
+            document.getElementById('userRole').textContent = currentUser.role === 'admin' ? 'Admin' : 'Kind';
             
             // Admin-Bereich anzeigen/verstecken
             if (currentUser.role === 'admin') {
-                appContainer.classList.add('admin-visible');
-                document.getElementById('userRole').textContent = 'Admin';
+                document.getElementById('appContainer').classList.add('admin-visible');
                 loadAllUsers();
             } else {
-                appContainer.classList.remove('admin-visible');
-                document.getElementById('userRole').textContent = 'Kind';
+                document.getElementById('appContainer').classList.remove('admin-visible');
             }
             
-            updatePointsDisplay();
+            // Daten laden
             loadTasks();
             loadRewards();
         }
 
         function showLogin() {
-            loginContainer.style.display = 'block';
-            appContainer.style.display = 'none';
-            document.getElementById('loginEmail').value = '';
-            document.getElementById('loginPassword').value = '';
+            document.getElementById('loginContainer').style.display = 'block';
+            document.getElementById('appContainer').style.display = 'none';
         }
 
-        // 📊 Daten laden
-        async function loadUserData() {
-            const userDoc = await db.collection('users').doc(currentUser.uid).get();
-            if (userDoc.exists) {
-                currentUser = { ...currentUser, ...userDoc.data() };
-            } else {
-                // Standardrolle für neue Benutzer
-                currentUser.role = 'child';
-                await db.collection('users').doc(currentUser.uid).set({
-                    email: currentUser.email,
-                    displayName: currentUser.email.split('@')[0],
-                    role: 'child',
-                    points: 0,
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        // 📊 DATEN LADEN
+        async function loadAllUsers() {
+            try {
+                const snapshot = await db.collection('users').get();
+                allUsers = [];
+                const select = document.getElementById('taskAssignedTo');
+                select.innerHTML = '';
+                
+                snapshot.forEach(doc => {
+                    const user = { id: doc.id, ...doc.data() };
+                    allUsers.push(user);
+                    
+                    // Für Admin: Dropdown für Aufgaben-Zuweisung füllen
+                    const option = document.createElement('option');
+                    option.value = doc.id;
+                    option.textContent = `${user.displayName} (${user.role})`;
+                    select.appendChild(option);
                 });
+            } catch (error) {
+                console.error("Fehler beim Laden der Benutzer:", error);
             }
         }
 
         async function loadTasks() {
             document.getElementById('tasksLoading').style.display = 'block';
-            tasksList.innerHTML = '';
+            document.getElementById('tasksList').innerHTML = '';
+            document.getElementById('noTasks').style.display = 'none';
             
-            let query;
-            if (currentUser.role === 'admin') {
-                // Admin sieht alle Aufgaben
-                query = db.collection('tasks').where('completed', '==', false);
-            } else {
-                // Kind sieht nur seine eigenen Aufgaben
-                query = db.collection('tasks')
-                    .where('assignedTo', '==', currentUser.uid)
-                    .where('completed', '==', false);
+            try {
+                let query;
+                if (currentUser.role === 'admin') {
+                    // Admin sieht alle offenen Aufgaben
+                    query = db.collection('tasks').where('completed', '==', false);
+                } else {
+                    // Kind sieht nur seine eigenen Aufgaben
+                    query = db.collection('tasks')
+                        .where('assignedTo', '==', currentUser.uid)
+                        .where('completed', '==', false);
+                }
+                
+                const snapshot = await query.get();
+                
+                if (snapshot.empty) {
+                    document.getElementById('noTasks').style.display = 'block';
+                } else {
+                    snapshot.forEach(doc => {
+                        const task = { id: doc.id, ...doc.data() };
+                        renderTask(task);
+                    });
+                }
+                
+            } catch (error) {
+                console.error("Fehler beim Laden der Aufgaben:", error);
+                document.getElementById('tasksList').innerHTML = 
+                    '<div class="error">Fehler beim Laden der Aufgaben</div>';
             }
-            
-            const snapshot = await query.get();
-            currentUserTasks = [];
-            
-            snapshot.forEach(doc => {
-                const task = { id: doc.id, ...doc.data() };
-                currentUserTasks.push(task);
-                renderTask(task);
-            });
             
             document.getElementById('tasksLoading').style.display = 'none';
         }
 
         async function loadRewards() {
             document.getElementById('rewardsLoading').style.display = 'block';
-            rewardsList.innerHTML = '';
+            document.getElementById('rewardsList').innerHTML = '';
+            document.getElementById('noRewards').style.display = 'none';
             
-            const snapshot = await db.collection('rewards')
-                .where('active', '==', true)
-                .get();
-            
-            allRewards = [];
-            snapshot.forEach(doc => {
-                const reward = { id: doc.id, ...doc.data() };
-                allRewards.push(reward);
-                renderReward(reward);
-            });
+            try {
+                const snapshot = await db.collection('rewards')
+                    .where('active', '==', true)
+                    .get();
+                
+                if (snapshot.empty) {
+                    document.getElementById('noRewards').style.display = 'block';
+                } else {
+                    snapshot.forEach(doc => {
+                        const reward = { id: doc.id, ...doc.data() };
+                        renderReward(reward);
+                    });
+                }
+            } catch (error) {
+                console.error("Fehler beim Laden der Belohnungen:", error);
+            }
             
             document.getElementById('rewardsLoading').style.display = 'none';
         }
 
-        async function loadAllUsers() {
-            const snapshot = await db.collection('users').get();
-            allUsers = [];
-            const select = document.getElementById('taskAssignedTo');
-            select.innerHTML = '';
-            
-            snapshot.forEach(doc => {
-                const user = { id: doc.id, ...doc.data() };
-                allUsers.push(user);
-                
-                // Für Admin: Dropdown für Aufgaben-Zuweisung füllen
-                const option = document.createElement('option');
-                option.value = doc.id;
-                option.textContent = `${user.displayName} (${user.role})`;
-                select.appendChild(option);
-            });
-        }
-
-        // 🎨 UI Rendering
+        // 🎨 UI RENDERN
         function renderTask(task) {
             const taskElement = document.createElement('div');
             taskElement.className = 'task-item';
@@ -664,7 +780,7 @@
                 </div>
             `;
             
-            tasksList.appendChild(taskElement);
+            document.getElementById('tasksList').appendChild(taskElement);
         }
 
         function renderReward(reward) {
@@ -689,17 +805,18 @@
                 </div>
             `;
             
-            rewardsList.appendChild(rewardElement);
+            document.getElementById('rewardsList').appendChild(rewardElement);
         }
 
-        // ✅ Task Management
+        // ✅ TASK FUNKTIONEN (global für onclick)
         window.completeTask = async function(taskId, points) {
+            if (!confirm(`Aufgabe als erledigt markieren und ${points} Punkte erhalten?`)) return;
+            
             try {
                 // Aufgabe als erledigt markieren
                 await db.collection('tasks').doc(taskId).update({
                     completed: true,
-                    completedAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    completedBy: currentUser.uid
+                    completedAt: new Date().toISOString()
                 });
                 
                 // Punkte dem Kind gutschreiben
@@ -709,25 +826,42 @@
                 
                 // Lokale Daten aktualisieren
                 currentUser.points += points;
-                updatePointsDisplay();
+                document.getElementById('pointsCount').textContent = currentUser.points;
+                document.getElementById('totalPoints').textContent = currentUser.points;
                 
                 // Task aus der Liste entfernen
                 document.getElementById(`task-${taskId}`).remove();
                 
-                alert(`Super! Du hast ${points} Punkte verdient!`);
+                // Falls keine Aufgaben mehr da sind
+                if (document.getElementById('tasksList').children.length === 0) {
+                    document.getElementById('noTasks').style.display = 'block';
+                }
+                
+                alert(`Super! Du hast ${points} Punkte erhalten!`);
             } catch (error) {
                 alert('Fehler: ' + error.message);
             }
         };
 
-        // 🎁 Reward Management
+        window.deleteTask = async function(taskId) {
+            if (!confirm('Aufgabe wirklich löschen?')) return;
+            
+            try {
+                await db.collection('tasks').doc(taskId).delete();
+                document.getElementById(`task-${taskId}`).remove();
+            } catch (error) {
+                alert('Fehler: ' + error.message);
+            }
+        };
+
+        // 🎁 REWARD FUNKTIONEN
         window.redeemReward = async function(rewardId, points) {
             if (currentUser.points < points) {
                 alert('Nicht genug Punkte!');
                 return;
             }
             
-            if (!confirm(`Möchtest du diese Belohnung für ${points} Punkte einlösen?`)) return;
+            if (!confirm(`Belohnung für ${points} Punkte einlösen?`)) return;
             
             try {
                 // Punkte abziehen
@@ -735,40 +869,26 @@
                     points: firebase.firestore.FieldValue.increment(-points)
                 });
                 
-                // Belohnung als eingelöst markieren
-                await db.collection('rewards').doc(rewardId).update({
-                    redeemedBy: firebase.firestore.FieldValue.arrayUnion(currentUser.uid),
-                    lastRedeemed: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                
                 // Lokale Daten aktualisieren
                 currentUser.points -= points;
-                updatePointsDisplay();
-                
-                // Verlauf speichern
-                await db.collection('history').add({
-                    userId: currentUser.uid,
-                    type: 'reward_redeemed',
-                    points: -points,
-                    description: `Belohnung eingelöst: ${document.querySelector(`#reward-${rewardId} .reward-title`).textContent}`,
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                });
+                document.getElementById('pointsCount').textContent = currentUser.points;
+                document.getElementById('totalPoints').textContent = currentUser.points;
                 
                 alert('Belohnung erfolgreich eingelöst!');
+                
+                // Belohnung deaktivieren (optional)
+                // await db.collection('rewards').doc(rewardId).update({ active: false });
+                
+                // Button deaktivieren
+                const btn = document.querySelector(`#reward-${rewardId} .redeem-btn`);
+                if (btn) btn.disabled = true;
+                
             } catch (error) {
                 alert('Fehler: ' + error.message);
             }
         };
 
-        // ✨ Admin Functions
-        window.deleteTask = async function(taskId) {
-            if (!confirm('Aufgabe wirklich löschen?')) return;
-            
-            await db.collection('tasks').doc(taskId).delete();
-            document.getElementById(`task-${taskId}`).remove();
-        };
-
-        // 📝 Modal Management
+        // 📝 MODAL FUNKTIONEN
         document.getElementById('addTaskBtn').addEventListener('click', () => {
             if (currentUser.role !== 'admin') {
                 alert('Nur Admins können Aufgaben hinzufügen');
@@ -785,12 +905,16 @@
             document.getElementById('rewardModal').style.display = 'flex';
         });
 
-        document.getElementById('manageUsersBtn').addEventListener('click', () => {
-            document.getElementById('userModal').style.display = 'flex';
-            loadUsersList();
+        document.getElementById('addChildBtn').addEventListener('click', () => {
+            document.getElementById('childModal').style.display = 'flex';
         });
 
-        // 💾 Save Functions
+        document.getElementById('manageUsersBtn').addEventListener('click', async () => {
+            document.getElementById('userModal').style.display = 'flex';
+            await loadUsersForModal();
+        });
+
+        // 💾 SPEICHERN FUNKTIONEN
         document.getElementById('saveTaskBtn').addEventListener('click', async () => {
             const title = document.getElementById('taskTitle').value;
             const points = parseInt(document.getElementById('taskPoints').value);
@@ -808,7 +932,7 @@
                     assignedTo: assignedTo,
                     createdBy: currentUser.uid,
                     completed: false,
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    createdAt: new Date().toISOString()
                 });
                 
                 document.getElementById('taskModal').style.display = 'none';
@@ -837,7 +961,7 @@
                     points: points,
                     active: true,
                     createdBy: currentUser.uid,
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    createdAt: new Date().toISOString()
                 });
                 
                 document.getElementById('rewardModal').style.display = 'none';
@@ -851,83 +975,108 @@
             }
         });
 
-        document.getElementById('saveUserBtn').addEventListener('click', async () => {
-            const name = document.getElementById('newUserName').value;
-            const email = document.getElementById('newUserEmail').value;
-            const password = document.getElementById('newUserPassword').value;
-            const role = document.getElementById('newUserRole').value;
+        document.getElementById('saveChildBtn').addEventListener('click', async () => {
+            const name = document.getElementById('childName').value;
+            const email = document.getElementById('childEmail').value;
+            const password = document.getElementById('childPassword').value;
             
             if (!name || !email || !password) {
                 alert('Bitte alle Felder ausfüllen');
                 return;
             }
             
+            if (password.length < 6) {
+                alert('Passwort muss mindestens 6 Zeichen haben');
+                return;
+            }
+            
             try {
-                // Benutzer in Firebase Auth erstellen
+                // Kind in Firebase Auth erstellen
                 const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                const user = userCredential.user;
                 
-                // Benutzerdaten in Firestore speichern
-                await db.collection('users').doc(userCredential.user.uid).set({
+                // Kind in Firestore speichern
+                await db.collection('users').doc(user.uid).set({
                     email: email,
                     displayName: name,
-                    role: role,
+                    role: 'child',
                     points: 0,
                     createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                     createdBy: currentUser.uid
                 });
                 
-                // Formular zurücksetzen
-                document.getElementById('newUserName').value = '';
-                document.getElementById('newUserEmail').value = '';
-                document.getElementById('newUserPassword').value = '';
+                // Formular zurücksetzen und Modal schließen
+                document.getElementById('childModal').style.display = 'none';
+                document.getElementById('childName').value = '';
+                document.getElementById('childEmail').value = '';
+                document.getElementById('childPassword').value = '';
                 
                 // Benutzerliste aktualisieren
                 loadAllUsers();
-                loadUsersList();
                 
-                alert('Benutzer erfolgreich erstellt!');
+                alert(`Kind "${name}" erfolgreich erstellt!`);
+                
             } catch (error) {
-                alert('Fehler: ' + error.message);
+                let errorMsg = "Fehler: ";
+                if (error.code === 'auth/email-already-in-use') {
+                    errorMsg = "Diese E-Mail ist bereits registriert!";
+                } else if (error.code === 'auth/invalid-email') {
+                    errorMsg = "Ungültige E-Mail-Adresse!";
+                } else {
+                    errorMsg += error.message;
+                }
+                alert(errorMsg);
             }
         });
 
-        async function loadUsersList() {
+        async function loadUsersForModal() {
             const usersListDiv = document.getElementById('usersList');
-            usersListDiv.innerHTML = '<h3>Bestehende Benutzer:</h3>';
+            usersListDiv.innerHTML = '';
             
-            const snapshot = await db.collection('users').get();
-            snapshot.forEach(doc => {
-                const user = doc.data();
-                const userElement = document.createElement('div');
-                userElement.style.padding = '10px';
-                userElement.style.borderBottom = '1px solid #eee';
-                userElement.innerHTML = `
-                    <strong>${user.displayName}</strong> (${user.email})<br>
-                    Rolle: ${user.role} • Punkte: ${user.points || 0}
-                `;
-                usersListDiv.appendChild(userElement);
-            });
-        }
-
-        // 📊 Helper Functions
-        function updatePointsDisplay() {
-            if (currentUser && currentUser.points !== undefined) {
-                document.getElementById('totalPoints').textContent = currentUser.points;
-                document.getElementById('pointsCount').textContent = currentUser.points;
+            try {
+                const snapshot = await db.collection('users').get();
+                
+                if (snapshot.empty) {
+                    usersListDiv.innerHTML = '<p>Noch keine Benutzer.</p>';
+                    return;
+                }
+                
+                snapshot.forEach(doc => {
+                    const user = doc.data();
+                    const userElement = document.createElement('div');
+                    userElement.style.padding = '10px';
+                    userElement.style.margin = '5px 0';
+                    userElement.style.background = '#f5f5f5';
+                    userElement.style.borderRadius = '5px';
+                    userElement.innerHTML = `
+                        <strong>${user.displayName}</strong><br>
+                        E-Mail: ${user.email}<br>
+                        Rolle: ${user.role === 'admin' ? '👑 Admin' : '👦 Kind'} • 
+                        Punkte: ${user.points || 0}
+                    `;
+                    usersListDiv.appendChild(userElement);
+                });
+            } catch (error) {
+                console.error("Fehler beim Laden der Benutzer:", error);
+                usersListDiv.innerHTML = '<div class="error">Fehler beim Laden</div>';
             }
         }
 
-        // 🚪 Modal Close Events
+        // 🚪 MODAL SCHLIESSEN
         document.getElementById('closeTaskModal').addEventListener('click', () => {
             document.getElementById('taskModal').style.display = 'none';
         });
-
+        
         document.getElementById('closeRewardModal').addEventListener('click', () => {
             document.getElementById('rewardModal').style.display = 'none';
         });
-
+        
         document.getElementById('closeUserModal').addEventListener('click', () => {
             document.getElementById('userModal').style.display = 'none';
+        });
+        
+        document.getElementById('closeChildModal').addEventListener('click', () => {
+            document.getElementById('childModal').style.display = 'none';
         });
 
         // Klick außerhalb vom Modal schließt es
@@ -937,64 +1086,24 @@
             }
         });
 
-        // 👁️ Auth State Observer
+        // 🔄 AUTH STATE OBSERVER
         auth.onAuthStateChanged((user) => {
             if (user) {
-                currentUser = user;
-                loadUserData().then(() => {
-                    showApp();
-                });
+                // User ist eingeloggt, aber wir laden die Daten separat
+                if (!currentUser) {
+                    // Initialer Login - Daten werden in loginBtn Event geladen
+                    return;
+                }
             } else {
+                // User ist ausgeloggt
+                currentUser = null;
                 showLogin();
             }
         });
 
-        // Demo-Daten für den ersten Start
-        async function initializeDemoData() {
-            // Prüfen, ob bereits Daten existieren
-            const usersSnapshot = await db.collection('users').get();
-            if (usersSnapshot.size === 0) {
-                // Demo-Admin erstellen
-                try {
-                    const adminCredential = await auth.createUserWithEmailAndPassword(
-                        'admin@familie.de', 
-                        'passwort123'
-                    );
-                    
-                    await db.collection('users').doc(adminCredential.user.uid).set({
-                        email: 'admin@familie.de',
-                        displayName: 'Admin',
-                        role: 'admin',
-                        points: 0,
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                    
-                    // Demo-Kind erstellen
-                    const childCredential = await auth.createUserWithEmailAndPassword(
-                        'max@familie.de',
-                        'passwort123'
-                    );
-                    
-                    await db.collection('users').doc(childCredential.user.uid).set({
-                        email: 'max@familie.de',
-                        displayName: 'Max',
-                        role: 'child',
-                        points: 100,
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                    
-                    // Ausloggen, damit sich der User einloggen kann
-                    auth.signOut();
-                    
-                    alert('Demo-Daten wurden erstellt!\nAdmin: admin@familie.de / passwort123\nKind: max@familie.de / passwort123');
-                } catch (error) {
-                    console.log('Demo-Daten konnten nicht erstellt werden:', error);
-                }
-            }
-        }
-
-        // App starten
-        initializeDemoData();
+        // 🏁 APP STARTEN
+        console.log("App geladen. Warte auf Firebase...");
+        
     </script>
 </body>
 </html>
